@@ -6,6 +6,8 @@ import { Upload, Sparkles, ArrowRight } from 'lucide-react';
 export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string>('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -18,18 +20,23 @@ export default function Home() {
   };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      setFileName(files[0].name);
-    }
-  };
+  e.preventDefault();
+  setIsDragging(false);
+
+  const files = e.dataTransfer.files;
+
+  if (files.length > 0) {
+    setFileName(files[0].name);
+    setShowResults(false);
+  }
+};
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      setFileName(files[0].name);
+  const files = e.target.files;
+
+  if (files && files.length > 0) {
+    setFileName(files[0].name);
+    setShowResults(false);
     }
   };
 
@@ -112,10 +119,43 @@ export default function Home() {
             </div>
 
             {/* CTA Button */}
-            <button className="w-full sm:w-auto px-8 py-4 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 group">
+            <button   disabled={!fileName}
+            onClick={() => {
+            setIsAnalyzing(true)
+
+            setTimeout(() => {
+              setIsAnalyzing(false)
+              setShowResults(true)
+            }, 2000)
+          }} className="w-full sm:w-auto px-8 py-4 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 group">
               <span>Analyze My Resume</span>
               <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </button>
+
+            {isAnalyzing && (
+            <div className="mt-6 text-center text-blue-400">
+              Analyzing Resume...
+            </div>
+            )}
+
+            <p className="text-gray-400 mb-4">
+            Resume: {fileName}
+            </p>
+
+            {showResults && (
+            <div className="mt-8 p-6 rounded-xl bg-zinc-900 border border-zinc-800">
+              <h2 className="text-2xl font-bold mb-4">
+                Resume Score: 78/100
+              </h2>
+
+              <p>✓ Strong Projects</p>
+              <p>✓ Good Technical Skills</p>
+
+              <p className="mt-4">
+                Missing Skills: System Design, Cloud Deployment
+              </p>
+            </div>
+          )}
 
             {/* Support text */}
             <p className="text-xs sm:text-sm text-foreground/50">
