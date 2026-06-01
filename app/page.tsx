@@ -8,6 +8,7 @@ export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string>('');
   const [resumeText, setResumeText] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,6 +30,7 @@ export default function Home() {
 
   if (files.length > 0) {
     setFileName(files[0].name);
+    setSelectedFile(files[0]);
     setShowResults(false);
   }
 };
@@ -38,6 +40,7 @@ export default function Home() {
 
   if (files && files.length > 0) {
     setFileName(files[0].name);
+    setSelectedFile(files[0]);
     setShowResults(false);
 
     extractTextFromPDF(files[0]);
@@ -131,16 +134,23 @@ export default function Home() {
             onClick={() => {
             setIsAnalyzing(true)
 
-            fetch('/api/parse-resume', {
-            method: 'POST',
-            })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
+            const formData = new FormData();
 
-              setIsAnalyzing(false);
-              setShowResults(true);
-            });
+            if (selectedFile) {
+              formData.append("resume", selectedFile);
+
+              fetch("/api/parse-resume", {
+                method: "POST",
+                body: formData,
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  console.log(data);
+
+                  setIsAnalyzing(false);
+                  setShowResults(true);
+                });
+            }
           }} className="w-full sm:w-auto px-8 py-4 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 group">
               <span>Analyze My Resume</span>
               <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />

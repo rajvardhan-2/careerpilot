@@ -1,5 +1,12 @@
-export async function POST() {
+export async function POST(request: Request) {
+  const formData = await request.formData();
+
+  const file = formData.get("resume") as File;
+
+  console.log("Backend received:", file.name);
+
   return Response.json({
-    message: "Parse Resume API Working",
+    success: true,
+    fileName: file.name,
   });
 }
