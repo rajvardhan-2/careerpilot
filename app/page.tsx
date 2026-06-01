@@ -2,10 +2,12 @@
 
 import { useState, useRef } from 'react';
 import { Upload, Sparkles, ArrowRight } from 'lucide-react';
+import pdf from 'pdf-parse';
 
 export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string>('');
+  const [resumeText, setResumeText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,11 +39,17 @@ export default function Home() {
   if (files && files.length > 0) {
     setFileName(files[0].name);
     setShowResults(false);
+
+    extractTextFromPDF(files[0]);
     }
   };
 
   const handleClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const extractTextFromPDF = async (file: File) => {
+    console.log("PDF received:", file.name);
   };
 
   return (
@@ -123,10 +131,16 @@ export default function Home() {
             onClick={() => {
             setIsAnalyzing(true)
 
-            setTimeout(() => {
-              setIsAnalyzing(false)
-              setShowResults(true)
-            }, 2000)
+            fetch('/api/parse-resume', {
+            method: 'POST',
+            })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+
+              setIsAnalyzing(false);
+              setShowResults(true);
+            });
           }} className="w-full sm:w-auto px-8 py-4 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 group">
               <span>Analyze My Resume</span>
               <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
@@ -154,6 +168,33 @@ export default function Home() {
               <p className="mt-4">
                 Missing Skills: System Design, Cloud Deployment
               </p>
+
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-3">
+                  Score Breakdown
+                </h3>
+
+                <div className="space-y-2 text-gray-300">
+                  <p>Projects: 9/10</p>
+                  <p>Skills: 8/10</p>
+                  <p>Education: 8/10</p>
+                  <p>Achievements: 6/10</p>
+                  <p>Formatting: 8/10</p>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-3">
+                  Recommended Next Steps
+                </h3>
+
+                <div className="space-y-2 text-gray-300">
+                  <p>→ Learn System Design fundamentals</p>
+                  <p>→ Build one cloud-based project</p>
+                  <p>→ Add quantified achievements</p>
+                  <p>→ Improve resume summary section</p>
+                </div>
+              </div>
             </div>
           )}
 
